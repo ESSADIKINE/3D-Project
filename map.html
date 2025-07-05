@@ -3,31 +3,339 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROF 3D Map</title>
-  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ROF</title>
+  <link rel="icon" href="images/favicon.png" type="image/ico">
+  <link rel="SHORTCUT ICON" href="images/favicon.png">
+  <script type="text/javascript">
+    function toggle_visibility(id) {
+      var x = document.getElementById(id);
+      if (x.style.display === "block") {
+        x.style.display = "none";
+      } else {
+        x.style.display = "block";
+      }
+    }
+    function toggle_visibility2(id) {
+      var x = document.getElementById(id);
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    }
+    function myFunction3() {
+      var element = document.getElementById("responsive-menu-icon");
+      element.classList.remove("change");
+    }
+
+  </script>
+  <script src="js/jquery-2.1.1.min.js"></script>
+  <link href="css/custom.css" rel="stylesheet" type="text/css">
+  <link href="css/custom-responsive.css" rel="stylesheet" type="text/css">
+  <style>
+    #compass {
+      position: absolute;
+      left: 5px;
+      bottom: 1px;
+      z-index: 50;
+      cursor: pointer;
+    }
+
+    #compass .circle {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      background-image: url(images/compass_circle.png);
+      background-size: cover;
+      display: inline-block;
+    }
+
+    #compass .needle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(0deg);
+      height: 65px;
+      background-size: cover;
+    }
+
+    @media all and (max-width: 768px) {
+      #compass .circle {
+        width: 40px;
+        height: 40px;
+      }
+
+      #compass .needle {
+        height: 45px;
+      }
+    }
+  </style>
 </head>
 
 <body>
   <div id="map"></div>
-  <div id="menu">
-    <button id="fullscreen">Fullscreen</button>
-    <button id="about">About Us</button>
-  </div>
-  <div id="about-modal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>About Us</h2>
-      <p>ROF 3D Map is an interactive mapping application that provides detailed 3D visualization of geographical data.</p>
+  
+  <!-- Compass -->
+  <div id="compass">
+    <div class="circle">
+      <img class="needle" src="images/needle.png">
     </div>
   </div>
 
-  <script type="module">
-    import 'maplibre-gl/dist/maplibre-gl.css';
-    
+  <!-- Full Screen Mode Button -->
+  <div class="full-screen-button-area">
+    <button class="js-toggle-fullscreen-btn toggle-fullscreen-btn" aria-label="Enter fullscreen mode"></button>
+  </div>
+  <script>
+    if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
+      const toggleBtn = document.querySelector('.js-toggle-fullscreen-btn');
+
+      toggleBtn.addEventListener('click', function () {
+        if (document.fullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitFullscreenElement) {
+          document.webkitCancelFullScreen()
+        } else if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.documentElement.webkitRequestFullScreen();
+        }
+      });
+
+      document.addEventListener('fullscreenchange', handleFullscreen);
+      document.addEventListener('webkitfullscreenchange', handleFullscreen);
+
+
+      function handleFullscreen() {
+        if (document.fullscreen || document.webkitFullscreenElement) {
+          toggleBtn.classList.add('on');
+          toggleBtn.setAttribute('aria-label', 'Exit fullscreen mode');
+        } else {
+          toggleBtn.classList.remove('on');
+          toggleBtn.setAttribute('aria-label', 'Enter fullscreen mode');
+        }
+      }
+    }
+  </script>
+
+  <!-- Collapse Arrow -->
+  <a href="#" class="collapse-arrow" id="collapse-arrow" onclick="toggle_visibility('collapse-arrow')" style="display:none"><img src="images/collapse-arrow.png"></a>
+
+  <!-- Responsive Menu -->
+  <div class="responsive-menu-icon" id="responsive-menu-icon" onclick="myFunction2(this); toggle_visibility('mobile-menu');">
+    <div class="bar1"></div>
+    <div class="bar2"></div>
+    <div class="bar3"></div>
+  </div>
+
+  <!-- Header -->
+  <header id="header">
+    <a href="./" class="header-logo"><img src="images/rof-logo.png"></a>
+    <div class="top-navigation" id="top-navigation">
+      <ul>
+        <li><a href="./" class="btn active"><img src="images/home-icon.png"></a></li>
+        <li><a href="#open-modal-1" class="btn">About Us</a></li>
+        <li><a href="#" class="btn dropbtn" onclick="myFunction()">New Launch</a>
+          <div id="myDropdown" class="dropdown-content">
+            <a href="#" class="rof-insignia-park">ROF Pravasa</a>
+            <a href="#" class="sidebarToggle3">Nearby Landmarks</a>
+          </div>
+        </li>
+        <li><a href="#" id="header-project" class="btn sidebarToggle2">Projects</a></li>
+      </ul>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <ul>
+        <li><a href="./" class="btn active" onclick="myFunction3(); toggle_visibility2('mobile-menu');"><img src="images/home-icon.png"></a></li>
+        <li><a href="#open-modal-1" class="btn" onclick="myFunction3(); toggle_visibility2('mobile-menu');">About Us</a>
+        </li>
+        <li><a href="#" class="btn dropbtn" onclick="toggle_visibility('mobile-submenu');">New Launch</a>
+          <div id="mobile-submenu" class="dropdown-content">
+            <a href="#" class="rof-insignia-park" onclick="myFunction3(); toggle_visibility2('mobile-menu');">ROF Pravasa</a>
+            <a href="#" class="sidebarToggle3" onclick="myFunction3(); toggle_visibility2('mobile-menu');">Nearby
+              Landmarks</a>
+          </div>
+        </li>
+        <li><a href="#" class="btn sidebarToggle2" onclick="myFunction3(); toggle_visibility2('mobile-menu');" id="header-project--mobile">Projects</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="footer-caption" id="footer-caption"></div>
+  <script>
+    /* When the user clicks on the button,
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+      document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function (event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- The Modal-1 -->
+  <div id="open-modal-1" class="modal-window">
+    <div>
+      <a href="#" title="Close" class="modal-close">X</a>
+      <h2>About Us</h2>
+      <p>Welcome to ROF, your trusted partner in real estate excellence. We are a name synonymous with innovation,
+        integrity, and unmatched commitment to delivering quality projects. Our path in the real estate industry has
+        been shaped by an unwavering commitment to excellence and a determination to surpass the expectations of our
+        valued customers. ROF was founded with a clear vision to transform the real estate landscape by creating
+        world-class, sustainable, and affordable living spaces. Over the years, we have grown from strength to strength,
+        earning the trust of our customers and the respect of our peers in the industry. Our success story is a
+        testament to our unwavering commitment to quality and transparency.
+      </p>
+    </div>
+  </div>
+
+  <!-- Sidebar 2 -->
+  <div id="sidebar2" style="right: -320px;">
+    <div class="sb-main">
+      <div class="sb-content">
+        <div class="close close2">X</div>
+        <div class="project-holder" id="project-holder">
+          <!-- Project list will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar 3 -->
+  <div id="sidebar3" style="right: -207px;">
+    <div class="sb-main">
+      <div class="sb-content">
+        <div class="close close3">X</div>
+        <div class="location-holder" id="location-holder">
+          <!-- Location list will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function myFunction2(x) { x.classList.toggle("change"); }
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="js/simplesidebar.min.js"></script>
+  <script>
+    var sidebar, sidebar2, sidebar3, lastOpened
+    $(function () {
+      sidebar = $('#sidebar').SimpleSidebar({
+        mainDiv: $('#main'),
+        toggleEl: $('.sidebarToggle'),
+        rtl: false,
+      });
+
+      sidebar2 = $('#sidebar2').SimpleSidebar({
+        mainDiv: $('#main'),
+        toggleEl: $('.sidebarToggle2'),
+        rtl: true,
+      });
+
+      sidebar3 = $('#sidebar3').SimpleSidebar({
+        mainDiv: $('#main'),
+        toggleEl: $('.sidebarToggle3'),
+        rtl: true,
+      });
+
+      $('.sidebarToggleAll').click(function () {
+        sidebar.toggle();
+        sidebar2.toggle();
+      });
+
+      $('.close1').click(function () {
+        sidebar.toggle();
+      });
+
+      $('.close2').click(function () {
+        sidebar2.toggle();
+      });
+
+      $('.dropbtn').click(function () {
+        document.getElementById('sidebar2').style.right = '-320px';
+        document.getElementById('sidebar3').style.right = '-207px';
+      });
+
+      $('.sidebarToggle2').click(function () {
+        document.getElementById('sidebar3').style.right = '-207px';
+        document.getElementById('sidebar2').style.right = '0px';
+      });
+
+      $('.sidebarToggle3').click(function () {
+        document.getElementById('sidebar2').style.right = '-320px';
+      });
+
+      $('.close3').click(function () {
+        sidebar3.toggle();
+      });
+
+      $("#collapse-arrow").click(function () {
+        $("#collapse-arrow").hide();
+        if (lastOpened && lastOpened.toggle) {
+          lastOpened.toggle();
+        }
+      })
+    });
+  </script>
+
+  <script>
+    // Add active class to the current button (highlight it)
+    var header = document.getElementById("location-holder");
+    var btns = header.getElementsByClassName("btn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function () {
+        var current = document.getElementsByClassName("active");
+        current[0].className = current[0].className.replace(" active", "");
+        this.className += " active";
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      var target = event.target;
+      if (target.classList.contains('accordion')) {
+        // already active
+        if (target.classList.contains('active')) {
+          $(target).removeClass("active");
+          var panel = target.nextElementSibling;
+          panel.style.maxHeight = "0px";
+          return;
+        }
+        $(target).parent().find(".accordion.active").each((index, element) => {
+          $(element).removeClass("active")
+        })
+        $(target).parent().find(".panel").each((index, element) => {
+          $(element).css("max-height", "")
+        })
+        target.classList.toggle("active");
+        var panel = target.nextElementSibling;
+        if (panel.style.maxHeight) {
+          panel.style.maxHeight = null;
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+      }
+    });
+  </script>
+
+  <!-- MapLibre GL Map -->
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script>
+    // Initialize the map
     const map = new maplibregl.Map({
       container: 'map',
       style: 'https://demotiles.maplibre.org/style.json',
@@ -38,34 +346,19 @@
     // Add navigation controls
     map.addControl(new maplibregl.NavigationControl());
 
-    // Fullscreen functionality
-    document.getElementById('fullscreen').addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-      } else {
-        document.exitFullscreen();
+    // Add compass functionality
+    map.on('rotate', function() {
+      const needle = document.querySelector('#compass .needle');
+      if (needle) {
+        needle.style.transform = `translate(-50%, -50%) rotate(${-map.getBearing()}deg)`;
       }
     });
 
-    // Modal functionality
-    const modal = document.getElementById('about-modal');
-    const btn = document.getElementById('about');
-    const span = document.getElementsByClassName('close')[0];
-
-    btn.onclick = function() {
-      modal.style.display = "block";
-    }
-
-    span.onclick = function() {
-      modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
+    // Compass click to reset rotation
+    document.getElementById('compass').addEventListener('click', function() {
+      map.easeTo({ bearing: 0 });
+    });
   </script>
-</body>
 
+</body>
 </html>
