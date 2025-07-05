@@ -1,0 +1,18 @@
+{
+  "name": "rof3d",
+  "version": "1.0.0",
+  "description": "ROF 3D Map Project",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "maplibre-gl": "^3.6.2",
+    "jquery": "^2.1.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+} 

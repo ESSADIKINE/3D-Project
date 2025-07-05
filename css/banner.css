@@ -1,0 +1,211 @@
+body {margin:0px; padding:0px; background-color:#000;}
+
+body, html {height:100%;}
+
+a{transition: all 0.5s ease-in 0s; text-decoration:none!important; outline:none; color: #000;}
+
+a:focus, a:active,  a, focus, select {border:0px; outline:none;}
+
+.clear{clear:both;}
+
+p{margin-top:0px; text-align: left;}
+
+img {border:0px;}
+
+form{margin:0px;}
+
+input {outline:none;}
+
+* {box-sizing:border-box; }
+
+#banner1 { background-image:url("../images/1.jpg"); background-position: center top; background-size:cover;}
+#banner2 { background-image:url("../images/2.jpg"); background-position: center top; background-size:cover;}
+#banner3 { background-image:url("../images/3.jpg"); background-position: center top; background-size:cover;}
+#banner4 { background-image:url("../images/4.jpg"); background-position: center top; background-size:cover;}
+#banner5 { background-image:url("../images/5.jpg"); background-position: center top; background-size:cover;}
+
+.logo {position: fixed; left: 20px; top:20px; width: 300px; z-index: 10;}
+
+.explore-button {position: fixed; right:0px; bottom:60px; padding:0px; width: 300px; height: 70px; background-image: url("../images/button-bg.png"); background-position: -140px center; display: block; z-index: 10;}
+
+.explore-button img {margin: 30px 30px; transition: all 0.5s ease-in 0s;}
+
+.explore-button:hover {background-position: 0px center;}
+
+.explore-button:hover img {margin: 30px 90px; transition: all 0.5s ease-in 0s;} 
+
+
+
+
+
+
+/*  768px  */
+@media all and (max-width: 979px) {
+
+.logo {  left: 30px;  top: 40px;  width: 160px;}	
+	
+	
+	
+}
+
+
+
+
+
+/*  640px  */
+@media all and (max-width: 767px) {
+	
+.logo {  left: 30px;  top: 20px;  width: 160px;}	
+		
+.explore-button {width: 250px;  height: 60px; background-size:auto 60px; background-position: -70px center; }	
+	
+.explore-button img {width: 140px; margin: 26px 30px;}
+	
+.explore-button:hover img { margin: 26px 75px;  transition: all 0.5s ease-in 0s;}	
+
+	
+}
+
+
+
+
+
+
+
+
+
+/*  480px  */
+@media all and (max-width: 639px) {
+
+
+.explore-button {bottom:40px;}	
+	
+.logo {    left: 20px;    top: 10px;    width: 200px;  }	
+
+}
+
+
+
+
+
+
+
+
+/*  360px  */
+@media all and (max-width: 479px) {
+
+
+.explore-button {bottom:40px;}	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+.slider-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
+
+.slider-container h1 {
+	color: #fff;
+	font-size: 36px;
+	line-height:42px;
+	position: relative;
+	z-index: 2;
+	text-align: left;
+	width:1200px;
+	text-transform:uppercase;
+	margin-top:-50px;
+}
+
+.slider-container h1 strong {
+	font-size:72px;
+	display:block;
+	line-height:80px;
+  -webkit-text-fill-color: transparent; /* Will override color (regardless of order) */
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: #fff;
+}
+
+.slider-container::after {
+	background-color: #000;
+	content: '';
+	position: absolute;
+	opacity: 0.0;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	z-index: 1;
+}
+
+.slide {
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	height: 100%;
+	width: 100%;
+	transform: scale(1.15);
+	transition: opacity .9s ease;
+}
+
+.slide.active {
+	animation: grow 10s linear forwards;
+	opacity: 1;
+}
+
+@keyframes grow {
+	0%, 20% {
+		transform: scale(1);
+	}
+	
+	75%, 100% {
+		transform: scale(1.15);
+	}
+}
+
+.controls-container {
+	position: absolute;
+	bottom: 50px;
+	left: 0px;
+	display: block;
+	flex-direction: column;
+	z-index: 2;
+	width:100%;
+	text-align:center;
+	display: none;
+}
+
+.control {
+	background-color: #fff;
+	cursor: pointer;
+	opacity: 0.5;
+	margin: 6px;
+	height: 5px;
+	width: 50px;
+	transition: opacity 0.3s, background-color 0.3s, transform 0.3s;
+	display:inline-block;
+}
+
+.control.active, .control:hover {
+	background-color: #fff;
+	opacity: 1;
+	transform: scale(1.2);
+}
