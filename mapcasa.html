@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casablanca 3D Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+const landmarks = [
+  { id: 'mosque', url: 'models/Casablanca_Landmarks/Hassan_II_Mosque.glb', coord: [-7.6046, 33.6073] },
+  { id: 'mall', url: 'models/Casablanca_Landmarks/Morocco_Mall.glb', coord: [-7.6884, 33.5673] },
+  { id: 'cafe', url: 'models/Casablanca_Landmarks/Ricks_Cafe.glb', coord: [-7.6114, 33.5986] },
+  { id: 'medina', url: 'models/Casablanca_Landmarks/Old_Medina.glb', coord: [-7.6120, 33.5958] },
+  { id: 'beach', url: 'models/Casablanca_Landmarks/Ain_Diab_Beach.glb', coord: [-7.6806, 33.5939] }
+];
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://demotiles.maplibre.org/style.json',
+  center: [-7.6299, 33.5731],
+  zoom: 12,
+  pitch: 60,
+  bearing: -17.6,
+  antialias: true
+});
+
+function createModelLayer(id, url, origin) {
+  const modelAltitude = 0;
+  const modelRotate = [Math.PI / 2, 0, 0];
+  const merc = maplibregl.MercatorCoordinate.fromLngLat(origin, modelAltitude);
+  const modelTransform = {
+    translateX: merc.x,
+    translateY: merc.y,
+    translateZ: merc.z,
+    rotateX: modelRotate[0],
+    rotateY: modelRotate[1],
+    rotateZ: modelRotate[2],
+    scale: merc.meterInMercatorCoordinateUnits()
+  };
+  return {
+    id: id,
+    type: 'custom',
+    renderingMode: '3d',
+    onAdd: function (map, gl) {
+      this.camera = new THREE.Camera();
+      this.scene = new THREE.Scene();
+      const light = new THREE.DirectionalLight(0xffffff);
+      light.position.set(0, -70, 100).normalize();
+      this.scene.add(light);
+      const light2 = new THREE.DirectionalLight(0xffffff);
+      light2.position.set(0, 70, 100).normalize();
+      this.scene.add(light2);
+      const loader = new THREE.GLTFLoader();
+      loader.load(url, (gltf) => {
+        this.scene.add(gltf.scene);
+      });
+      this.renderer = new THREE.WebGLRenderer({
+        canvas: map.getCanvas(),
+        context: gl,
+        antialias: true
+      });
+      this.renderer.autoClear = false;
+    },
+    render: function (gl, matrix) {
+      const rotationX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), modelTransform.rotateX);
+      const rotationY = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 1, 0), modelTransform.rotateY);
+      const rotationZ = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 0, 1), modelTransform.rotateZ);
+      const m = new THREE.Matrix4().fromArray(matrix);
+      const l = new THREE.Matrix4()
+        .makeTranslation(modelTransform.translateX, modelTransform.translateY, modelTransform.translateZ)
+        .scale(new THREE.Vector3(modelTransform.scale, -modelTransform.scale, modelTransform.scale))
+        .multiply(rotationX)
+        .multiply(rotationY)
+        .multiply(rotationZ);
+      this.camera.projectionMatrix = m.multiply(l);
+      this.renderer.resetState();
+      this.renderer.render(this.scene, this.camera);
+      this.map.triggerRepaint();
+    }
+  };
+}
+
+map.on('load', () => {
+  landmarks.forEach((lm) => {
+    map.addLayer(createModelLayer(lm.id, lm.url, lm.coord));
+  });
+
+  const roadData = {
+    type: 'FeatureCollection',
+    features: [
+      {type: 'Feature', geometry: {type: 'LineString', coordinates: [landmarks[0].coord, landmarks[3].coord]}},
+      {type: 'Feature', geometry: {type: 'LineString', coordinates: [landmarks[3].coord, landmarks[2].coord]}},
+      {type: 'Feature', geometry: {type: 'LineString', coordinates: [landmarks[2].coord, landmarks[4].coord]}},
+      {type: 'Feature', geometry: {type: 'LineString', coordinates: [landmarks[4].coord, landmarks[1].coord]}}
+    ]
+  };
+  map.addSource('roads', { type: 'geojson', data: roadData });
+  map.addLayer({
+    id: 'roads',
+    type: 'line',
+    source: 'roads',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#ff0000', 'line-width': 4 }
+  });
+});
+</script>
+</body>
+</html>
