@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casablanca 3D Mosque</title>
+  <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css' />
+  <script src='https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js'></script>
+  <style>
+      body { margin: 0; padding: 0; }
+      html, body, #map { height: 100%; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script type="module">
+  import * as THREE from 'https://esm.sh/three@0.160.0';
+  import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
+  const MAPTILER_KEY = 'get_your_own_OpIi9ZULNHzrESv6T2vL';
+  const map = new maplibregl.Map({
+      style: `https://api.maptiler.com/maps/basic-v2/style.json?key=${MAPTILER_KEY}`,
+      center: [-7.6325, 33.6073],
+      zoom: 16,
+      pitch: 60,
+      bearing: 0,
+      container: 'map',
+      canvasContextAttributes: {antialias: true}
+  });
+
+  map.on('load', () => {
+      const layers = map.getStyle().layers;
+      let labelLayerId;
+      for (let i = 0; i < layers.length; i++) {
+          if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+              labelLayerId = layers[i].id;
+              break;
+          }
+      }
+
+      map.addSource('openmaptiles', {
+          url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${MAPTILER_KEY}`,
+          type: 'vector',
+      });
+
+      map.addLayer(
+          {
+              'id': '3d-buildings',
+              'source': 'openmaptiles',
+              'source-layer': 'building',
+              'type': 'fill-extrusion',
+              'minzoom': 15,
+              'filter': ['!=', ['get', 'hide_3d'], true],
+              'paint': {
+                  'fill-extrusion-color': [
+                      'interpolate',
+                      ['linear'],
+                      ['get', 'render_height'], 0, 'lightgray', 200, 'royalblue', 400, 'lightblue'
+                  ],
+                  'fill-extrusion-height': [
+                      'interpolate',
+                      ['linear'],
+                      ['zoom'],
+                      15,
+                      0,
+                      16,
+                      ['get', 'render_height']
+                  ],
+                  'fill-extrusion-base': ['case',
+                      ['>=', ['get', 'zoom'], 16],
+                      ['get', 'render_min_height'], 0
+                  ]
+              }
+          },
+          labelLayerId
+      );
+
+      // 3D Mosque model using Three.js
+      const modelOrigin = [-7.6325, 33.6073];
+      const modelAltitude = 5;
+      const modelRotate = [Math.PI / 2, 0, 0];
+      const mercator = maplibregl.MercatorCoordinate.fromLngLat(modelOrigin, modelAltitude);
+      const modelScale = mercator.meterInMercatorCoordinateUnits() * 0.2;
+
+      const customLayer = {
+          id: 'hassan-ii-mosque',
+          type: 'custom',
+          renderingMode: '3d',
+          onAdd: function(map, gl) {
+              this.camera = new THREE.Camera();
+              this.scene = new THREE.Scene();
+
+              const light = new THREE.DirectionalLight(0xffffff, 1);
+              light.position.set(50, 50, 100).normalize();
+              this.scene.add(light);
+
+              const loader = new GLTFLoader();
+              loader.load('./models/mosque.glb', (gltf) => {
+                  this.scene.add(gltf.scene);
+              });
+
+              this.renderer = new THREE.WebGLRenderer({
+                  canvas: map.getCanvas(),
+                  context: gl,
+                  antialias: true
+              });
+              this.renderer.autoClear = false;
+          },
+          render: function(gl, matrix) {
+              const rotationX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1,0,0), modelRotate[0]);
+              const rotationY = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0,1,0), modelRotate[1]);
+              const rotationZ = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0,0,1), modelRotate[2]);
+
+              const m = new THREE.Matrix4().fromArray(matrix);
+              const l = new THREE.Matrix4()
+                  .makeTranslation(mercator.x, mercator.y, mercator.z)
+                  .scale(new THREE.Vector3(modelScale, -modelScale, modelScale))
+                  .multiply(rotationX)
+                  .multiply(rotationY)
+                  .multiply(rotationZ);
+
+              this.camera.projectionMatrix = m.multiply(l);
+              this.renderer.resetState();
+              this.renderer.render(this.scene, this.camera);
+              map.triggerRepaint();
+          }
+      };
+
+      map.addLayer(customLayer);
+  });
+</script>
+</body>
+</html>
