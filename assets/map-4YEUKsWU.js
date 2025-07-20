@@ -1,3 +1,6 @@
+import { Yp } from "./data.js";
+import "./fn1.js";
+import "./fn2.js";
 var Yf = Object.defineProperty,
     qf = Object.defineProperties;
 var $f = Object.getOwnPropertyDescriptors;

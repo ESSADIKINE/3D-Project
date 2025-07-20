@@ -1,4 +1,4 @@
-const Yp = [{
+export const Yp = [{
     name: "Basant Valley Public School",
     center: [76.93680372410364, 28.442455686912695],
     latitude: 28.442455686912695,
@@ -1456,3 +1456,4 @@ qp = [{
     deliveredYear: 2023,
     isProject: !0
 }];
+export { Yp };
